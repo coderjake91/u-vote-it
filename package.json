@@ -1,0 +1,26 @@
+{
+  "name": "u-vote-it",
+  "version": "1.0.0",
+  "description": "meetup group member voting application that is developed using  Express.js and MySQL.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coderjake91/u-vote-it.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/coderjake91/u-vote-it/issues"
+  },
+  "homepage": "https://github.com/coderjake91/u-vote-it#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "jest": "^27.2.1",
+    "mysql2": "^2.3.0"
+  }
+}
