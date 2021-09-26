@@ -26,7 +26,10 @@ const db = mysql.createConnection(
 
 //api endpoint route that queries the database using the query method on the instantiated 'db' object, select all rows in the candidates table
 app.get('/api/candidates', (req, res) => {
-    const sql = `select * from candidates`;
+    const sql = `select candidates.*, parties.name as party_name
+                from candidates
+                left join parties 
+                on candidates.party_id = parties.id`;
 
     db.query(sql, (err, rows) => {
         if(err) {
@@ -42,7 +45,12 @@ app.get('/api/candidates', (req, res) => {
 
 //GET a single candidate
 app.get('/api/candidate/:id', (req, res) => {
-    const sql = 'select * from candidates where id = ?';
+    const sql = `select candidates.*, parties.name 
+                as party_name 
+                from candidates 
+                left join parties 
+                on candidates.party_id = parties.id 
+                where candidates.id = ?`;
     const params = [req.params.id];
 
     db.query(sql, params, (err, row) => {
