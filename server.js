@@ -3,6 +3,8 @@ const express = require('express');
 const PORT = process.env.PORT || 3001;
 //import mysql2 module
 const mysql = require('mysql2');
+//import inputCheck module
+const inputCheck = require('./utils/inputCheck');
 
 //server instance
 const app = express();
@@ -22,38 +24,81 @@ const db = mysql.createConnection(
     console.log('Connected to the election database')
 );
 
-//query the database using the query method on the instantiated 'db' object, select all rows in the candidates table
-// db.query(`select * from candidates`, (err, rows) => {
-//     //console.log(rows);
-// });
+//api endpoint route that queries the database using the query method on the instantiated 'db' object, select all rows in the candidates table
+app.get('/api/candidates', (req, res) => {
+    const sql = `select * from candidates`;
+
+    db.query(sql, (err, rows) => {
+        if(err) {
+            res.status(500).json({error: err.message });
+            return;
+        }
+        res.json({
+            message: 'success',
+            data: rows
+        });
+    });
+});
 
 //GET a single candidate
-// db.query(`SELECT * FROM candidates WHERE id = 1`, (err, row) => {
-//     if(err) {
-//         console.log(err);
-//     }
-//     console.log(row);
-// });
+app.get('/api/candidate/:id', (req, res) => {
+    const sql = 'select * from candidates where id = ?';
+    const params = [req.params.id];
+
+    db.query(sql, params, (err, row) => {
+        if(err) {
+            res.status(400).json( { error: err.message });
+            return;
+        }
+        res.json({
+            message: 'success',
+            data: row
+        });
+    });
+});
 
 //delete a candidate (question mark in query statement denotes a 'prepared statement' with param argument for id)
-// db.query(`delete from candidates where id = ?`, 1, (err, result) => {
-//     if(err) {
-//         console.log(err);
-//     }
-//     console.log(result);
-// });
+app.delete('/api/candidate/:id', (req, res) => {
+    const sql = 'delete from candidates where id = ?';
+    const params = [req.params.id];
+
+    db.query(sql, params, (err, result) => {
+        if(err) {
+            res.statusMessage(400).json({ error: err.message });
+        } else if (!result.affectedRows) {
+            res.json({message: 'Candidate not found'
+            });
+        } else {
+            res.json({
+                message: ' successfully deleted',
+                changes: result.affectedRows,
+                id: req.params.id
+            });
+        }
+    });
+});
 
 //create a candidate
-// const sql = `insert into candidates (id, first_name, last_name, industry_connected) values (?,?,?,?)`;
-// const params = [1, 'Ronald', 'Firbank', 1];
-
-// db.query(sql, params, (err, result) => {
-//     if(err) {
-//         console.log(err);
-//     }
-//     console.log(result);
-// });
-
+app.post('/api/candidate', ({body}, res) => {
+    const errors = inputCheck(body, 'first_name', 'last_name', 'industry_connected');
+    if(errors) {
+        res.status(400).json({ error: errors });
+        return;
+    }
+    const sql = `insert into candidates (first_name, last_name, industry_connected) values (?,?,?)`;
+    const params = [body.first_name, body.last_name, body.industry_connected];
+    
+    db.query(sql, params, (err, result) => {
+        if(err) {
+            res.status(400).json({ error: err.message});
+            return;
+        }
+        res.json({
+            message: 'Candidate successfully added!',
+            data: body
+        });
+    });
+});
 
 //default response for any other request (Not Found), this 'catchall' route needs to be the last defined route!
 app.use((req, res) => {
