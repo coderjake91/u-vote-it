@@ -15,3 +15,11 @@ create table candidates (
     industry_connected boolean not null,
     constraint fk_party foreign key (party_id) references parties(id) on delete set null
 );
+
+create table voters (
+    id integer auto_increment primary key,
+    first_name varchar(30) not null,
+    last_name varchar(30) not null,
+    email varchar(50) not null,
+    created_at datetime default current_timestamp
+);
